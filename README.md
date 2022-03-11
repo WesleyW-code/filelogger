@@ -1,6 +1,6 @@
 # NOTES
 
-# Assignment
+# Assignment:
 
 ## File logger
 
