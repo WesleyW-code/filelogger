@@ -13,6 +13,7 @@ using Moq;
 // https://makolyte.com/csharp-unit-testing-code-that-does-file-io/
 // Tutorial on using Moq.
 // https://spin.atomicobject.com/2017/08/07/intro-mocking-moq/
+// https://hamidmosalla.com/2017/08/03/moq-working-with-setupget-verifyget-setupset-verifyset-setupproperty/#:~:text=Moq%20VerifyGet&text=VerifyGet%20helps%20us%20verify%20that,the%20getter%20of%20FirstName%20property.
 
 namespace FileLoggerKata.Tests
 {
@@ -25,17 +26,22 @@ namespace FileLoggerKata.Tests
         // Creating all the days of the week needed to test certian scenarios. 
 
         private static readonly DateTime Saturday = new DateTime(2022, 3, 5);// Saturday
+
         private static readonly DateTime Sunday = new DateTime(2022, 3, 6);// Sunday
         private DateTime Today_Default => new DateTime(2022, 3, 11); // Friday (A day during the week)
 
         // Creating all the neccesarry things needed to test certian file instances.
 
         private const string TestMessage = "WesleyUnitTests"; // Standard Message needed to add to the text files.
+
         private string LogFileName_Default => $"log{Today_Default:yyyyMMdd}.txt"; // Creates a default name for a file.
+
+        private string LogFileName_Weekend => "weekend.txt"; // Creates weekend filename.
 
         // Need these to create date objects and manipulate files.
 
         private Mock<IDateProvider> DateProvider_Mock { get; } // Creates a mock IDateProvider object
+
         private Mock<IFileSystem> FileSystem_Mock { get; } // Creates a mock IFileSystem object
 
         // Need this to access Filelogger and test its methods.
@@ -47,6 +53,7 @@ namespace FileLoggerKata.Tests
         {
             // This is allowing my Mock DateProvider to have the same behavioral traits as IDateProvider (Allowing it to do the same things)
             DateProvider_Mock = new Mock<IDateProvider>(MockBehavior.Strict);
+
             // Setting up DateProvider_Mock so that is returns my created Today_Default.  
             DateProvider_Mock.Setup(d => d.Today).Returns(Today_Default);
 
@@ -76,11 +83,40 @@ namespace FileLoggerKata.Tests
 
             // Then checking/Verifying if the expected file now exists.
             // Times.once refers to how many times it verifys
-            FileSystem_Mock.Verify(f => f.Exists(LogFileName_Default), Times.Once); 
+            FileSystem_Mock.Verify(f => f.Exists(LogFileName_Default), Times.Once);
+            
             // Verifying that the expected file was created.
             FileSystem_Mock.Verify(f => f.Create(LogFileName_Default), Times.Once);
+
             // Verifying that the message was appended to the file correctly.
             FileSystem_Mock.Verify(f => f.Append(LogFileName_Default, TestMessage), Times.Once);
+        }
+        [TestMethod]
+        public void IfWeekend_CreatesWeekendLog_and_AppendsMsg()
+        {
+            // Setting up FileSystem_Mock so it returns that there is no Weekend file.
+            FileSystem_Mock.Setup(f => f.Exists(LogFileName_Weekend)).Returns(false);
+
+            // Setting the date to be a Saturday
+            DateProvider_Mock.Setup(d => d.Today).Returns(Saturday);
+
+            // Passing my default test message through the log() method.
+            file_logger.Log(TestMessage);
+
+            // Times.once refers that the action must only happen once.
+            // Times.AtLeastOnce refers that the action must happen atleast once.
+            // VerifyGet is only used when there is a { get; } on the property we are checking. This will only apply to IDateProvider.Today.
+            DateProvider_Mock.VerifyGet(d => d.Today, Times.AtLeastOnce);
+
+            // Then checking/Verifying if the expected file now exists.
+            // On a weekend it checks if the file exists more than once.
+            FileSystem_Mock.Verify(f => f.Exists(LogFileName_Weekend), Times.AtLeastOnce);
+
+            // Verifying that the expected file was created.
+            FileSystem_Mock.Verify(f => f.Create(LogFileName_Weekend), Times.Once);
+
+            // Verifying that the message was appended to the file correctly.
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once);
         }
 
     }
