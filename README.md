@@ -1,6 +1,10 @@
-# File logger
+# NOTES
 
-## What does the application do?
+# Assignment
+
+## File logger
+
+### What does the application do?
 The application has a class 'FileLogger' with a method, Log(string message).
 
 When this method is called, it should append the message to the end of a file, "log.txt", located in the same folder as the running application (or tests).
