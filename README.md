@@ -1,5 +1,5 @@
 # NOTES
-This was an assignment i completed where i had to learn Unit testing using with C#. In the main version if you run the unit tests it will come up with one error which i have explained in the error message. 
+This was an assignment i completed where i had to learn Unit testing using C#. In the main version if you run the unit tests it will come up with one error(failed test) which i have explained why in the error message. 
 
 I then added a Fixed Version folder which contains a version where i located the logical error and fixed it. After that i ran the unit tests for the Fixed Version and found that all the tests passed!
 
