@@ -92,7 +92,48 @@ namespace FileLoggerKata.Tests
             FileSystem_Mock.Verify(f => f.Append(LogFileName_Default, TestMessage), Times.Once);
         }
         [TestMethod]
-        public void IfWeekend_CreatesWeekendLog_and_AppendsMsg()
+        public void IfLogExists_NotCreatesLog_and_AppendsMsg()
+        {
+            // Setting up FileSystem_Mock so it returns that there is a file.
+            FileSystem_Mock.Setup(f => f.Exists(LogFileName_Default)).Returns(true);
+
+            // Passing my default test message through the log() method.
+            file_logger.Log(TestMessage);
+
+            // Then checking/Verifying if the expected file now exists.
+            // Times.once refers to how many times it verifys
+            FileSystem_Mock.Verify(f => f.Exists(LogFileName_Default), Times.Once);
+
+            // Verifying that the expected file IS NOT created. So that i can test if the method just appends correctly
+            FileSystem_Mock.Verify(f => f.Create(LogFileName_Default), Times.Never, "A Log.txt file was created incorectly!");
+
+            // Verifying that the message was appended to the file correctly.
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Default, TestMessage), Times.Once,"The message was not appended to the Log.txt File");
+        }
+        [TestMethod]
+        public void IfWNKDLogExistAndSunday_NotCreatesLog_and_AppendsMsg()
+        {
+            // Setting up FileSystem_Mock so it returns that there is a file.
+            FileSystem_Mock.Setup(f => f.Exists(LogFileName_Weekend)).Returns(true);
+
+            // Setting the date to be a Sunday
+            DateProvider_Mock.Setup(d => d.Today).Returns(Sunday);
+
+            // Passing my default test message through the log() method.
+            file_logger.Log(TestMessage);
+
+            // Then checking/Verifying if the expected file now exists.
+            // When the date is on a weekend the Exists property is called multiple times.
+            FileSystem_Mock.Verify(f => f.Exists(LogFileName_Weekend), Times.AtLeastOnce);
+
+            // Verifying that the expected file IS NOT created. So that i can test if the method just appends correctly
+            FileSystem_Mock.Verify(f => f.Create(LogFileName_Weekend), Times.Never,"A Weekend.txt file was created incorectly!");
+
+            // Verifying that the message was appended to the file correctly.
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once, "The message was not appended to the Weekend.txt File");
+        }
+        [TestMethod]
+        public void IfSaturday_CreatesWeekendLog_and_AppendsMsg()
         {
             // Setting up FileSystem_Mock so it returns that there is no Weekend file.
             FileSystem_Mock.Setup(f => f.Exists(LogFileName_Weekend)).Returns(false);
@@ -106,17 +147,124 @@ namespace FileLoggerKata.Tests
             // Times.once refers that the action must only happen once.
             // Times.AtLeastOnce refers that the action must happen atleast once.
             // VerifyGet is only used when there is a { get; } on the property we are checking. This will only apply to IDateProvider.Today.
-            DateProvider_Mock.VerifyGet(d => d.Today, Times.AtLeastOnce);
+            DateProvider_Mock.VerifyGet(d => d.Today, Times.AtLeastOnce,"Todays date was not fetched!");
 
             // Then checking/Verifying if the expected file now exists.
             // On a weekend it checks if the file exists more than once.
             FileSystem_Mock.Verify(f => f.Exists(LogFileName_Weekend), Times.AtLeastOnce);
 
             // Verifying that the expected file was created.
-            FileSystem_Mock.Verify(f => f.Create(LogFileName_Weekend), Times.Once);
+            FileSystem_Mock.Verify(f => f.Create(LogFileName_Weekend), Times.Once,"New Weekend.txt File was not created!");
 
             // Verifying that the message was appended to the file correctly.
-            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once);
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once, "The message was not appended to the Weekend.txt File");
+        }
+        [TestMethod]
+        public void IfSunday_CreatesWeekendLog_and_AppendsMsg()
+        {
+            // Setting up FileSystem_Mock so it returns that there is no Weekend file.
+            FileSystem_Mock.Setup(f => f.Exists(LogFileName_Weekend)).Returns(false);
+
+            // Setting the date to be a Sunday
+            DateProvider_Mock.Setup(d => d.Today).Returns(Sunday);
+
+            // Passing my default test message through the log() method.
+            file_logger.Log(TestMessage);
+
+            // Times.once refers that the action must only happen once.
+            // Times.AtLeastOnce refers that the action must happen atleast once.
+            // VerifyGet is only used when there is a { get; } on the property we are checking. This will only apply to IDateProvider.Today.
+            DateProvider_Mock.VerifyGet(d => d.Today, Times.AtLeastOnce,"Todays date was not fetched!");
+
+            // Then checking/Verifying if the expected file now exists.
+            // On a weekend it checks if the file exists more than once.
+            FileSystem_Mock.Verify(f => f.Exists(LogFileName_Weekend), Times.AtLeastOnce);
+
+            // Verifying that the expected file was created.
+            FileSystem_Mock.Verify(f => f.Create(LogFileName_Weekend), Times.Once,"New Weekend.txt File was not created!");
+
+            // Verifying that the message was appended to the file correctly.
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once,"The message was not appended to the Weekend.txt File");
+        }
+        [TestMethod]
+        public void IfSunday_And_WeekendLogExists_AppendsMsg()
+        {
+            // Setting up FileSystem_Mock so it returns that there is a Weekend file.
+            FileSystem_Mock.Setup(f => f.Exists(LogFileName_Weekend)).Returns(true);
+
+            // Setting the date to be a Sunday
+            DateProvider_Mock.Setup(d => d.Today).Returns(Sunday);
+
+            // Passing my default test message through the log() method.
+            file_logger.Log(TestMessage);
+
+            // Times.once refers that the action must only happen once.
+            // Times.AtLeastOnce refers that the action must happen atleast once.
+            // VerifyGet is only used when there is a { get; } on the property we are checking. This will only apply to IDateProvider.Today.
+            DateProvider_Mock.VerifyGet(d => d.Today, Times.AtLeastOnce, "Todays date was not fetched!");
+
+            // Then checking/Verifying if the expected file now exists.
+            // On a weekend it checks if the file exists more than once.
+            FileSystem_Mock.Verify(f => f.Exists(LogFileName_Weekend), Times.AtLeastOnce);
+
+            // Verifying that the expected file was created.
+            FileSystem_Mock.Verify(f => f.Create(LogFileName_Weekend), Times.Never, "New Weekend.txt File was created and shouldn't!");
+
+            // Verifying that the message was appended to the file correctly.
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once, "The message was not appended to the Weekend.txt File");
+        }
+
+        [TestMethod]
+        public void IfWKNDLogExists_ButFromPastWKND_EditedOnSaturday_RenameOldLog()
+        {
+            // Creating an old date.
+            DateTime OldDate = new DateTime(2022, 2, 19);// Saturday-Two weekends back to test better.
+            var OldDateFileName = $"weekend-{OldDate:yyyyMMdd}.txt";
+
+            // Setting todays Date.
+            DateProvider_Mock.Setup(d => d.Today).Returns(Saturday);
+
+            // Setting up FileSystem_Mock so it returns that there is a Weekend file.
+            FileSystem_Mock.Setup(f => f.Exists(LogFileName_Weekend)).Returns(true);
+
+            // Telling the system that the file was written on the OldDate
+            FileSystem_Mock.Setup(f => f.GetLastWriteTime(LogFileName_Weekend)).Returns(OldDate);
+
+            // Passing my default test message through the log() method.
+            file_logger.Log(TestMessage);
+
+            // Then checking/Verifying that the old Weekend.txt file is remaned as exepected.
+            FileSystem_Mock.Verify(f => f.Rename(LogFileName_Weekend, OldDateFileName), Times.Once,"The File was not renamed as expected!");
+
+            // This verifying that the new Weekend.txt file is appended to.
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend,TestMessage), Times.Once,"The message was not appended to the new Weekend.txt file!");
+
+        }
+        public void IfWKNDLogExists_ButFromPastWKND_EditedOnSunday_RenameOldLog_WithSaturdayDate()
+        {
+            // Creating an old date.
+            DateTime OldSunday = new DateTime(2022, 2, 20);// Sunday-Two weekends back to test better.
+            DateTime OldSaturday = new DateTime(2022, 2, 19);// Saturday-For the file name.
+            var OldDateFileName = $"weekend-{OldSaturday:yyyyMMdd}.txt";
+
+            // Setting todays Date.
+            DateProvider_Mock.Setup(d => d.Today).Returns(Saturday);
+
+            // Setting up FileSystem_Mock so it returns that there is a Weekend file.
+            FileSystem_Mock.Setup(f => f.Exists(LogFileName_Weekend)).Returns(true);
+
+            // Telling the system that the file was written on the OldDate
+            FileSystem_Mock.Setup(f => f.GetLastWriteTime(LogFileName_Weekend)).Returns(OldSunday);
+
+            // Passing my default test message through the log() method.
+            file_logger.Log(TestMessage);
+
+            // Then checking/Verifying that the old Weekend.txt file is remaned as exepected.
+            FileSystem_Mock.Verify(f => f.Rename(LogFileName_Weekend, OldDateFileName), Times.Once, "The File was not renamed as expected!");
+
+            // This verifying that the new Weekend.txt file is appended to.
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once, "The message was not appended to the new Weekend.txt file!");
+
         }
 
     }
