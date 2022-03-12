@@ -1,7 +1,17 @@
 # NOTE
-This was an assignment I completed where I had to learn Unit testing using C#. In the main version if you run the unit tests it will come up with two error(failed tests) which I have explained why in the error messages. 
+This was an assignment I completed where I had to learn Unit testing using C#. 
 
-I then added a Fixed Version folder which contains a version where I located the logical error and fixed it. After that I ran the unit tests for the Fixed Version and found that all the tests passed!
+In the main version (*main/FileLoggerKata*) if you run the unit tests (in *main/FileLoggerKata.tests*) it will come up with two errors (failed tests). These errors were as follows:
+- The first error indicated that the Message being appended to the log did not get the date and time as a prefix
+- The second error indicated that when the old Weekend log was archived, it didn't get the date of the appropriate Saturday in all cases. 
+- I left the code as it came in *main/FileLoggerKata* so that these errors are still visible and present. I created a version where I updated and removed these errors in *main/FixedVersionAllPassed*.
+- You can find my unit tests in *main/FileLoggerKata.Tests*.
+
+In the *FixedVersionAllPassed* folder:
+- I updated the logic to add the date and time as a prefix to the message passed to Log before it gets appended to the appropriate file.
+- I also added adjustments so that when the old Weekend log is archived (and adds the date at the end: "weekend-YYYYMMDD.txt"), the date added is the date of the corresponding Saturday, instead of just the date of the weekend that the file was last editted.
+- These edits were both made in *main/FixedVersionAllPassed/FileLoggerKata/FileLogger.cs*
+
 
 # Assignment:
 
@@ -26,12 +36,12 @@ I then added a Fixed Version folder which contains a version where I located the
 > 
 > ### Example of final weekend behavior
 > Let's say the month starts on Saturday the 1st (e.g. 1 Feb 2020) and currently there are no log files present. Logging on Saturday the 1st goes to a file weekend.txt. Logging on Sunday the 2nd continues to go to weekend.txt. Throughout the week, new files are created for each date log20200203.txt, log20200204.txt, etc. Then Saturday 8 Feb 2020 rolls around and the last requirements comes into play. The existing weekend.txt file has metadata indicating it was created or last modified on Feb 1st/2nd (respectively). Thus, the logger renames the file to weekend-20200201.txt corresponding to the Saturday of that weekend log file. It then creates a new weekend.txt which is used for the rest of the 8th. And again on the 9th. That file will be renamed on 15 Feb to weekend-20200208.txt.
-
+> 
 > ### Note
 > An existing weekend.txt file isn't necessarily from the previous weekend (6 days ago). It could be that nothing was logged for several weeks. It's necessary to inspect the file to see when it was created/lastmodified to know what it should be renamed to.
-
+> 
 > ### The Task
 > Write Unit Tests for the File Logger class to ensure the class behaves as described above.
-
+> 
 > #### Hint
 > You will need to use test doubles in order to test certain scenarios.
