@@ -32,6 +32,12 @@ namespace FileLoggerKata.Tests
 
         // Creating all the neccesarry things needed to test certian file instances.
 
+        private string CorrectMessageToAppend => $"{Today_Default:yyyy-MM-dd HH:mm:ss} " + TestMessage; // The correct message that needs to be appened to the actual text file(During the week)!
+
+        private string CorrectMessageToAppend_Saturday => $"{Saturday:yyyy-MM-dd HH:mm:ss} " + TestMessage; // The correct message that needs to be appened to the actual text file(On Saturdays)!
+
+        private string CorrectMessageToAppend_Sunday => $"{Sunday:yyyy-MM-dd HH:mm:ss} " + TestMessage; // The correct message that needs to be appened to the actual text file(On Sundays)!
+
         private const string TestMessage = "WesleyUnitTests"; // Standard Message needed to add to the text files.
 
         private string LogFileName_Default => $"log{Today_Default:yyyyMMdd}.txt"; // Creates a default name for a file.
@@ -71,6 +77,16 @@ namespace FileLoggerKata.Tests
             file_logger = new FileLogger(FileSystem_Mock.Object, DateProvider_Mock.Object);
         }
 
+        [TestMethod]
+        public void Message_Appends_With_DateInFront()
+        {
+            // Passing my default test message through the log() method.
+            file_logger.Log(TestMessage);
+
+            // Verifying that the message was appended to the file correctly.
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Default, CorrectMessageToAppend), Times.Once, "The CORRECT message was not appended to the Log.txt File");
+        }
+
         // This test method will check if a file is created if one doesnt exist and then appends to it onces its made.
         [TestMethod]
         public void IfLogNotExists_CreatesLog_and_AppendsMsg()
@@ -89,7 +105,7 @@ namespace FileLoggerKata.Tests
             FileSystem_Mock.Verify(f => f.Create(LogFileName_Default), Times.Once);
 
             // Verifying that the message was appended to the file correctly.
-            FileSystem_Mock.Verify(f => f.Append(LogFileName_Default, TestMessage), Times.Once);
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Default, CorrectMessageToAppend), Times.Once);
         }
         [TestMethod]
         public void IfLogExists_NotCreatesLog_and_AppendsMsg()
@@ -108,7 +124,7 @@ namespace FileLoggerKata.Tests
             FileSystem_Mock.Verify(f => f.Create(LogFileName_Default), Times.Never, "A Log.txt file was created incorectly!");
 
             // Verifying that the message was appended to the file correctly.
-            FileSystem_Mock.Verify(f => f.Append(LogFileName_Default, TestMessage), Times.Once,"The message was not appended to the Log.txt File");
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Default, CorrectMessageToAppend), Times.Once,"The message was not appended to the Log.txt File");
         }
         [TestMethod]
         public void IfWNKDLogExistAndSunday_NotCreatesLog_and_AppendsMsg()
@@ -130,7 +146,7 @@ namespace FileLoggerKata.Tests
             FileSystem_Mock.Verify(f => f.Create(LogFileName_Weekend), Times.Never,"A Weekend.txt file was created incorectly!");
 
             // Verifying that the message was appended to the file correctly.
-            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once, "The message was not appended to the Weekend.txt File");
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, CorrectMessageToAppend_Sunday), Times.Once, "The message was not appended to the Weekend.txt File");
         }
         [TestMethod]
         public void IfSaturday_CreatesWeekendLog_and_AppendsMsg()
@@ -157,7 +173,7 @@ namespace FileLoggerKata.Tests
             FileSystem_Mock.Verify(f => f.Create(LogFileName_Weekend), Times.Once,"New Weekend.txt File was not created!");
 
             // Verifying that the message was appended to the file correctly.
-            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once, "The message was not appended to the Weekend.txt File");
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, CorrectMessageToAppend_Saturday), Times.Once, "The message was not appended to the Weekend.txt File");
         }
         [TestMethod]
         public void IfSunday_CreatesWeekendLog_and_AppendsMsg()
@@ -184,7 +200,7 @@ namespace FileLoggerKata.Tests
             FileSystem_Mock.Verify(f => f.Create(LogFileName_Weekend), Times.Once,"New Weekend.txt File was not created!");
 
             // Verifying that the message was appended to the file correctly.
-            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once,"The message was not appended to the Weekend.txt File");
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, CorrectMessageToAppend_Sunday), Times.Once,"The message was not appended to the Weekend.txt File");
         }
         [TestMethod]
         public void IfSunday_And_WeekendLogExists_AppendsMsg()
@@ -211,7 +227,7 @@ namespace FileLoggerKata.Tests
             FileSystem_Mock.Verify(f => f.Create(LogFileName_Weekend), Times.Never, "New Weekend.txt File was created and shouldn't!");
 
             // Verifying that the message was appended to the file correctly.
-            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once, "The message was not appended to the Weekend.txt File");
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, CorrectMessageToAppend_Sunday), Times.Once, "The message was not appended to the Weekend.txt File");
         }
 
         [TestMethod]
@@ -237,7 +253,7 @@ namespace FileLoggerKata.Tests
             FileSystem_Mock.Verify(f => f.Rename(LogFileName_Weekend, OldDateFileName), Times.Once,"The File was not renamed as expected!");
 
             // This verifying that the new Weekend.txt file is appended to.
-            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend,TestMessage), Times.Once,"The message was not appended to the new Weekend.txt file!");
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend,CorrectMessageToAppend_Saturday), Times.Once,"The message was not appended to the new Weekend.txt file!");
 
         }
         [TestMethod]
@@ -264,7 +280,7 @@ namespace FileLoggerKata.Tests
             FileSystem_Mock.Verify(f => f.Rename(LogFileName_Weekend, CorrectArcFileName), Times.Once, "The File was renamed with the Old Sunday Date instead of the Old Saturday Date!");
 
             // This verifying that the new Weekend.txt file is appended to.
-            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, TestMessage), Times.Once, "The message was not appended to the new Weekend.txt file!");
+            FileSystem_Mock.Verify(f => f.Append(LogFileName_Weekend, CorrectMessageToAppend_Saturday), Times.Once, "The message was not appended to the new Weekend.txt file!");
 
         }
 

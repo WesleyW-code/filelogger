@@ -18,7 +18,12 @@ namespace FileLoggerKata
         }
 
         public void Log(string message)
-        {
+        {   // WESLEY WEBER FIX TO FileLogger ----------------------------------------------------------------------------------------------------------------------
+            // Added this in so the correct message gets added to the Text file ------------------------------------------------------------------------------------
+            var LogDate = DateProvider.Today;
+            var MessageToAppend = $"{LogDate:yyyy-MM-dd HH:mm:ss} " + message;
+            //------------------------------------------------------------------------------------------------------------------------------------------------------
+
             var logFileName = GetLogFileName();
 
             if (ShouldRotateWeekendLogs())
@@ -31,7 +36,8 @@ namespace FileLoggerKata
                 FileSystem.Create(logFileName);
             }
 
-            FileSystem.Append(logFileName, message);
+            // Changed the Append statement to use my correct message ----------------------------------------------------------------------------------------------
+            FileSystem.Append(logFileName, MessageToAppend);
 
             bool ShouldRotateWeekendLogs()
             {
